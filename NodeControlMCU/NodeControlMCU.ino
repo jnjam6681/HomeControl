@@ -6,21 +6,23 @@
 
 // Set the LCD address to 0x27 for a 16 chars and 2 line display
 LiquidCrystal_I2C lcd(0x27, 16, 2);
+// pin 4 -> SCL D2
+// pin 5 -> SDA D1
 //
-const char* ssid = "id";
-const char* password = "password";
+const char* ssid = "AccessControl";
+const char* password = "";
 
 WiFiServer server(80);
 
 //set pin
-const int output1 = 16;
-const int output2 = 0;
-const int output3 = 2;
-const int output4 = 14;
-const int output5 = 12;
-const int output6 = 13;
-const int output7 = 15;
-const int output8 = 10;
+const int output1 = 16; // D0
+const int output2 = 0;  // D3
+const int output3 = 2;  // D4
+const int output4 = 14; // D5
+const int output5 = 12; // D6
+const int output6 = 13; // D7
+const int output7 = 15; // D8
+const int output8 = 10; // SD3
 
 //set status
 boolean device1 = false;
@@ -31,6 +33,11 @@ boolean device5 = false;
 boolean device6 = false;
 boolean device7 = false;
 boolean device8 = false;
+
+//sensor
+float amp = 0;
+int pin = A0;
+int i = 0;
 
 void setup() {
   //set pin mode
@@ -108,6 +115,10 @@ void loop() {
   while(!client.available()){
     delay(1);
   }*/
+
+  i = analogRead(pin);
+  amp = (((long)i * 5000 / 1024) - 500 ) * 1000 / 133;
+  amp = amp/1000;
 
   // Read the first line of the request
   String req = client.readStringUntil('\r');
@@ -250,11 +261,16 @@ void loop() {
   String cmd;
     cmd += "<!DOCTYPE HTML>\r\n";
     cmd += "<html>\r\n";
-    cmd += "<header><title>ESP8266 Webserver</title><h1>\"Control Your Devices\"</h1></header>";
+    cmd += "<header><title>ESP8266 Webserver</title></header>";
     cmd += "<head>";
     cmd += "<meta http-equiv='refresh' content='5'/>";
     cmd += "</head>";
     cmd += "";
+
+    cmd += "Current : ";
+    cmd += (amp);
+    cmd += " A";
+    cmd += "<br/>";
 
     if(device1){
       cmd +=("<br/>Device1  : ON ");
